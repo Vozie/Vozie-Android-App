@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:swipe="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipe_item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="90dp"
+    swipe:leftEdgeSwipeOffset="0dp"
+    swipe:rightEdgeSwipeOffset="0dp">
+    <!-- Bottom View Start-->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/bottom_panel"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content">
+        <ImageView android:id="@+id/edit_image"
+            android:layout_height="wrap_content"
+            android:layout_width="75dp"
+            android:padding="15dp"
+            android:src="@drawable/edit"
+            android:background="@color/bt_black"/>
+        <ImageView android:id="@+id/delete_image"
+            android:layout_height="wrap_content"
+            android:layout_width="75dp"
+            android:padding="15dp"
+            android:src="@drawable/delete"
+            android:background="@color/bt_black"/>
+    </LinearLayout>
+    <!-- Bottom View End-->
+
+    <!-- Surface View Start -->
+    <LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/payment_item_background"
+        android:gravity="center">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:orientation="horizontal"
+            android:padding="10dp">
+            <ImageView android:id="@+id/card_image"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="2"/>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:gravity="center"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp">
+                <LinearLayout android:orientation="vertical"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:weightSum="2">
+                    <RelativeLayout android:layout_height="0dp"
+                        android:layout_width="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
+                        <TextView
+                            android:id="@+id/name"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:textSize="18sp"
+                            android:textColor="#FFFFFF"
+                            android:layout_gravity="start"/>
+                        <TextView
+                            android:id="@+id/date"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:textSize="18sp"
+                            android:textColor="#FFFFFF"
+                            android:text="4/07"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentRight="true"/>
+                    </RelativeLayout>
+                    <TextView android:id="@+id/card_number"
+                        android:layout_height="0dp"
+                        android:layout_width="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:fontFamily="sans-serif-thin"
+                        android:textSize="20sp"
+                        android:layout_weight="1"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+    <!-- Surface View End -->
+</com.daimajia.swipe.SwipeLayout>

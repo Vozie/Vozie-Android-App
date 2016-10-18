@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Vozie</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password (optional)</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_login">Login</string>
+    <string name="facebook_app_id">1045486365507152</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- MapsActivity Strings -->
+    <string name="search_hint">Search for address...</string>
+    <!-- Payment Activity Strings -->
+    <string name="new_payment_dialog_button">Confirm</string>
+    <string name="new_payment_dialog_title">Add New Payment Method</string>
+    <string name="new_payment_dialog_title_edit">Edit Payment Method</string>
+    <!-- About Activity Strings -->
+    <string name="about_twitter">Follow On Twitter</string>
+    <string name="about_play_store">Rate on Play Store</string>
+    <string name="about_facebook">Like on Facebook</string>
+</resources>

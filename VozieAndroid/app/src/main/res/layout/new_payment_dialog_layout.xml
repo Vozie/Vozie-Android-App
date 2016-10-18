@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="350dp"
+    android:layout_height="500dp"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:id="@+id/new_payment_dialog_layout">
+    <LinearLayout android:id="@+id/new_payment_dialog_menu_layout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="450dp"
+        android:layout_alignParentTop="true">
+        <EditText android:id="@+id/new_payment_dialog_title"
+            android:cursorVisible="false"
+            android:enabled="false"
+            android:layout_height="80dp"
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/new_payment_dialog_title"
+            android:textColor="#FFFFFF"
+            android:fontFamily="sans-serif"
+            android:background="@color/red"
+            android:textSize="24sp"/>
+        <com.braintreepayments.cardform.view.CardForm
+            android:id="@+id/card_form"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="30dp"/>
+    </LinearLayout>
+    <Button android:id="@+id/new_payment_button"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/new_payment_dialog_button"
+        android:background="@drawable/new_payment_top_panel_border"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"/>
+</RelativeLayout>
