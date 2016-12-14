@@ -6,6 +6,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -95,9 +96,11 @@ public class MenuBarHandler {
                         appToLaunch = new Intent(a, MapsActivity.class);
                         break;
                     case 1:
+                        Log.d("DEBUG Menu","Attempting to Launch the PaymentActivity Class");
                         appToLaunch = new Intent(a, PaymentActivity.class);
                         break;
                     case 4:
+                        Log.d("DEBUG Menu","Attempting to Launch the About Activity Class");
                         appToLaunch = new Intent(a, AboutActivity.class);
                         break;
                     default:

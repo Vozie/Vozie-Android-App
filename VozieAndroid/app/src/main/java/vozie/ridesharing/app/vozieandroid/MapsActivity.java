@@ -13,6 +13,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -668,10 +670,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    searchImage.setImageDrawable(getResources().getDrawable(R.drawable.search));
+                    searchImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.search,null));
                     String addr = getAddressOfMarker();
 
-                    locationBar.setBackgroundColor(getResources().getColor(R.color.red));
+                    locationBar.setBackgroundColor(ContextCompat.getColor(getBaseContext(),(R.color.red)));
                     locationTextview.setTextColor(Color.WHITE);
                     locationTextview.setText(addr);
 
@@ -713,7 +715,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     searchImage.setOnClickListener(new ImageView.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-
+                            //Search Bar here?
+                            //allow user input for an address and search on the map
                         }
                     });
                     locationBar.setBackgroundColor(Color.WHITE);
