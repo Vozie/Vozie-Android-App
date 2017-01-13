@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:swipe="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipe_item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="180dp"
+    swipe:leftEdgeSwipeOffset="0dp"
+    swipe:rightEdgeSwipeOffset="0dp">
+    <!-- Bottom View Start-->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/bottom_panel"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content">
+
+    </LinearLayout>
+    <!-- Bottom View End-->
+
+    <!-- Surface View Start -->
+    <FrameLayout android:id="@+id/item_surface_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <ImageView android:id="@+id/item_map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:paddingStart="15dp"
+            android:paddingLeft="15dp"
+            android:paddingEnd="15dp"
+            android:paddingRight="15dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:background="#000"/>
+    </FrameLayout>
+    <!-- Surface View End -->
+</com.daimajia.swipe.SwipeLayout>

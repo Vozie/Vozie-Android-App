@@ -6,4 +6,5 @@
     android:padding="3dp"
     android:textColor="#000000"
     android:background="#FFFFFF"
-    android:textSize="18sp" />
+    android:textSize="18sp"
+    android:clickable="true"/>

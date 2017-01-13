@@ -8,25 +8,42 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.shane.vozieandroid.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -66,7 +83,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MapFunctions mapFunctions;
 
     private Projection projection;
-    private TextView locationTextview;
+    private EditText locationTextview;
     private LinearLayout markerControl;
     private LinearLayout locationBar;
     private ImageView locationMarker;
@@ -75,6 +92,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private RelativeLayout mapCover;
     private List<Driver> drivers;
     private List<View> driversListItems;
+    private ListView resultsListview;
+    MenuBarHandler menuBarHandler;
+    View searchDivider;
+    private BlockingArrayAdapter searchAdapter;
 
     private Animator revealAnimator;
     private FrameLayout driverPreviewLayout;
@@ -83,6 +104,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ImageView driverPreviewStarsImageview;
     private ImageView driverPreviewImageview;
 
+    private String currentSearchText;
+    private Thread searchThread;
+    private Location userLocation;
+    private ArrayList<String>  searchResults;
+    private List<Address> searchResultAddresses;
+
     private boolean firstRun = true;
     private boolean pickupMode = true;
     private boolean pinDown = true;
@@ -90,6 +117,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean driverPreviewMode = false;
     private boolean initialPanDone = false;
     private boolean initialPanStarted = false;
+
+    private int mode = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +132,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         // Initialize menu bar and navigation drawer
-        MenuBarHandler menuBarHandler = new MenuBarHandler(this);
+        menuBarHandler = new MenuBarHandler(this);
         menuBarHandler.init();
 
         // Initialize providers helper class
@@ -132,17 +161,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         driversListItems = driverAdapter.rowViews;
         driversListView.setAdapter(driverAdapter);
 
+        searchDivider = findViewById(R.id.search_divider);
+        searchDivider.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                searchDivider.removeOnLayoutChangeListener(this);
+                searchDivider.setY(convertDpToPixel(5));
+                searchDivider.setX(getScreenWidth());
+            }
+        });
 
         AssetManager am = getApplicationContext().getAssets();
-        locationTextview = (TextView) findViewById(R.id.location_textview);
+        locationTextview = (EditText) findViewById(R.id.location_textview);
         TextView markerControlTextview = (TextView) findViewById(R.id.marker_control_textview);
         markerControl = (LinearLayout) findViewById(R.id.marker_control);
         locationTextview.setTypeface(Typeface.createFromAsset(am,
                 String.format(Locale.US, "fonts/%s", "ufonts.com_microsoft-jhenghei.ttf")));
+        locationTextview.setCursorVisible(false);
+        locationTextview.setFocusable(false);
 
         locationMarker = (ImageView) findViewById(R.id.location_marker);
-        markerControl.setX(getScreenWidth()/2 - convertDpToPixel(80));
-        markerControl.setY(getScreenHeight()/2 - convertDpToPixel(95));
+        markerControl.setX(getScreenWidth() / 2 - convertDpToPixel(80));
+        markerControl.setY(getScreenHeight() / 2 - convertDpToPixel(95));
         markerControlTextview.setTypeface(Typeface.createFromAsset(am,
                 String.format(Locale.US, "fonts/%s", "ufonts.com_microsoft-jhenghei.ttf")));
 
@@ -154,14 +195,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         locationBar = (LinearLayout) findViewById(R.id.location_input_menu);
+        resultsListview = (ListView) findViewById(R.id.results_listview);
+        resultsListview.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                resultsListview.removeOnLayoutChangeListener(this);
+                resultsListview.setY(getScreenHeight() - menuBarHandler.getHeight());
+            }
+        });
+
+
         searchImage = (ImageView) findViewById(R.id.search_image);
+        searchImage.setClickable(true);
+        searchImage.setOnClickListener(new ImageView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activateSearchMode();
+            }
+        });
+
         mapCover = (RelativeLayout) findViewById(R.id.map_cover);
         driverPreviewLayout = (FrameLayout) findViewById(R.id.driver_preview_layout);
         driverPreviewLayout.setBackgroundColor(Color.TRANSPARENT);
         driverPreviewNameTextview = (TextView) findViewById(R.id.driver_preview_name_textview);
         driverPreviewNameTextview.setTypeface(Typeface.createFromAsset(am,
                 String.format(Locale.US, "fonts/%s", "ufonts.com_microsoft-jhenghei.ttf")));
-
 
         driverPreviewStarsImageview = (ImageView) findViewById(R.id.driver_preview_stars_img);
         driverPreviewPpmTextview = (TextView) findViewById(R.id.driver_preview_ppm_textview);
@@ -170,10 +229,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         ImageView driverPreviewBack = (ImageView) findViewById(R.id.back_image);
         ImageView driverPreviewWheel = (ImageView) findViewById(R.id.driver_preview_wheel);
 
+        searchResultAddresses = new ArrayList<>();
+
         driverPreviewWheel.setOnClickListener(new ImageView.OnClickListener() {
             @Override
             public void onClick(View v) {
-                
+
             }
         });
 
@@ -184,6 +245,187 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 hideDriverPreview();
             }
         });
+
+        searchResults = new ArrayList<String>();
+        searchAdapter = new BlockingArrayAdapter(MapsActivity.this,
+                R.layout.auto_complete_textview_item, searchResults);
+
+        resultsListview.setClickable(true);
+        //resultsListview.setItemsCanFocus(false);
+        //resultsListview.setFocusableInTouchMode(true);
+        //resultsListview.setFocusable(true);
+        //resultsListview.setItemsCanFocus(true);
+
+        resultsListview.setAdapter(searchAdapter);
+        resultsListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) {
+                Toast.makeText(getApplicationContext(), "lol", Toast.LENGTH_LONG);
+                deactivateSearchMode();
+                Location location = MapFunctions.getLocationFromAddress(searchResultAddresses.get(position));
+
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),
+                        location.getLongitude()),CAMERA_ZOOM_LEVEL), CAMERA_ZOOM_SPEED, null);
+            }
+        });
+        
+        locationTextview.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence charsequence, int i, int j, int k) {
+                /* Sets global currentText and attempts to create adapter before next character
+                   is entered. */
+                currentSearchText = charsequence.toString();
+                final Handler mHandler = new Handler() {
+                    public void handleMessage(Message msg) {
+                        String[] resultsArray = (String[]) msg.obj;
+
+                        if (resultsArray != null) {
+                            searchAdapter.clear();
+                            searchAdapter.addAll(resultsArray);
+                        }
+                        else {
+                            searchAdapter.clear();
+                        }
+                    }
+                };
+
+                searchThread = new Thread((new Runnable() {
+                    public void run() {
+                        List<Address> addresses = null;
+
+                        if (providers.isNetworkEnabled())
+                            addresses = MapFunctions.resultListFromUserInput(currentSearchText, userLocation);
+                        else {
+                            // Throw Connection Error
+                        }
+
+                        String tText = currentSearchText;
+                        searchResultAddresses = addresses;
+                        if (addresses != null) {
+                            String[] array = new String[addresses.size()];
+                            for (int l = 0; l < addresses.size(); l++) {
+                                Address indAddress = addresses.get(l);
+
+                                try {
+                                    array[l] = indAddress.getAddressLine(0) + " "
+                                            + indAddress.getAddressLine(1) + " "
+                                            + indAddress.getAddressLine(2);
+                                } catch (Exception e) {
+
+                                }
+                            }
+
+
+
+                            if (tText.equals(currentSearchText)) {
+                                Message msg = new Message();
+                                msg.obj = array;
+                                mHandler.sendMessage(msg);
+                                return;
+                            }
+                        }
+                        else {
+                            if (tText.equals(currentSearchText)) {
+                                Message msg = new Message();
+                                msg.obj = null;
+                                mHandler.sendMessage(msg);
+                                return;
+                            }
+                        }
+                    }
+                }));
+
+                if (searchThread.isAlive()) {
+                    searchThread.interrupt();
+                }
+
+                searchThread.start();
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charsequence, int i, int j, int k) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+    }
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
+
+    public void activateSearchMode() {
+        mode = 1;
+
+        locationTextview.setText("");
+        locationTextview.setClickable(true);
+        locationTextview.setCursorVisible(true);
+        locationTextview.setFocusableInTouchMode(true);
+        locationTextview.setInputType(InputType.TYPE_CLASS_TEXT);
+        locationTextview.requestFocus();
+
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (inputMethodManager != null) {
+            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        }
+
+        Animation raiseBarAnimation = new TranslateAnimation(0, 0, 0, -(getScreenHeight() - convertDpToPixel(60)
+                - locationBar.getHeight() - getStatusBarHeight()));
+        raiseBarAnimation.setDuration(500);
+        raiseBarAnimation.setFillEnabled(true);
+        raiseBarAnimation.setFillAfter(true);
+
+        Animation enterSearchDividerAnimation = new TranslateAnimation(0, -(getScreenWidth() - convertDpToPixel(5)), 0, 0);
+        enterSearchDividerAnimation.setDuration(500);
+        enterSearchDividerAnimation.setFillEnabled(true);
+        enterSearchDividerAnimation.setFillAfter(true);
+
+        Animation raiseSearchResultsAnimation = new TranslateAnimation(0, 0, 0, -(getScreenHeight() - convertDpToPixel(60)
+                - locationBar.getHeight()));
+        raiseSearchResultsAnimation.setDuration(500);
+        raiseSearchResultsAnimation.setFillEnabled(true);
+        raiseSearchResultsAnimation.setFillAfter(true);
+
+        resultsListview.startAnimation(raiseSearchResultsAnimation);
+        locationBar.startAnimation(raiseBarAnimation);
+        searchDivider.startAnimation(enterSearchDividerAnimation);
+    }
+
+    public void deactivateSearchMode() {
+        mode = 0;
+
+        locationTextview.setClickable(false);
+        locationTextview.setCursorVisible(false);
+        locationTextview.setFocusableInTouchMode(false);
+
+        Animation raiseBarAnimation = new TranslateAnimation(0, 0, -(getScreenHeight() - convertDpToPixel(60)
+                - locationBar.getHeight() - getStatusBarHeight()), 0);
+        raiseBarAnimation.setDuration(500);
+        raiseBarAnimation.setFillEnabled(true);
+        raiseBarAnimation.setFillAfter(true);
+
+        Animation enterSearchDividerAnimation = new TranslateAnimation(-(getScreenWidth() - convertDpToPixel(5)), 0, 0, 0);
+        enterSearchDividerAnimation.setDuration(500);
+        enterSearchDividerAnimation.setFillEnabled(true);
+        enterSearchDividerAnimation.setFillAfter(true);
+
+        Animation raiseSearchResultsAnimation = new TranslateAnimation(0, 0, -(getScreenHeight() - convertDpToPixel(60)
+                - locationBar.getHeight() - getStatusBarHeight()), 0);
+        raiseSearchResultsAnimation.setDuration(500);
+        raiseSearchResultsAnimation.setFillEnabled(true);
+        raiseSearchResultsAnimation.setFillAfter(true);
+
+        resultsListview.startAnimation(raiseSearchResultsAnimation);
+        locationBar.startAnimation(raiseBarAnimation);
+        searchDivider.startAnimation(enterSearchDividerAnimation);
     }
 
     public void lightenMap() {
@@ -313,8 +555,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBackPressed() {
-        moveTaskToBack(true);
-       // Login.super.onBackPressed();
+        if (mode == 1) {
+            deactivateSearchMode();
+            locationTextview.setText(mapFunctions.getAddressString(mapFunctions.getAddressFromLocation(userLocation)));
+        }
     }
 
     @Override
@@ -351,8 +595,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     location.getLongitude()),CAMERA_ZOOM_LEVEL), CAMERA_ZOOM_SPEED, null);
             initialPanStarted = true;
             firstRun = false;
-            Projection myProjection = mMap.getProjection();
         }
+
+        userLocation = location;
     }
 
 
@@ -393,7 +638,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void run() {
                 while (true) {
-                    if (mMapIsTouched && pickupMode) {
+                    if (mMapIsTouched && pickupMode && mode == 0) {
                         Runnable updateProjectionRunnable = new Runnable() {
                             @Override
                             public void run() {

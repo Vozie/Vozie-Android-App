@@ -23,7 +23,7 @@ import com.example.shane.vozieandroid.R;
 public class MenuBarHandler {
     private AppCompatActivity a;
     public Toolbar tb;
-    private String[] activities = {"Trip", "Payment Methods", "Trip History", "About Vozie", "Become a Driver"};
+    private String[] activities = {"Trip", "Payment Methods", "Trip History", "About Vozie"};
     private Intent appToLaunch;
     private boolean launchApp = false;
 
@@ -97,7 +97,10 @@ public class MenuBarHandler {
                     case 1:
                         appToLaunch = new Intent(a, PaymentActivity.class);
                         break;
-                    case 4:
+                    case 2:
+                        appToLaunch = new Intent(a, HistoryActivity.class);
+                        break;
+                    case 3:
                         appToLaunch = new Intent(a, AboutActivity.class);
                         break;
                     default:
@@ -108,5 +111,9 @@ public class MenuBarHandler {
                 mDrawerLayout.closeDrawer(mDrawerList);
             }
         });
+    }
+
+    public int getHeight() {
+        return tb.getHeight();
     }
 }
