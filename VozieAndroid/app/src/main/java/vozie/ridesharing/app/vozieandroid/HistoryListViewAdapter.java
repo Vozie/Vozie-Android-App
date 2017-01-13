@@ -64,7 +64,7 @@ public class HistoryListViewAdapter extends BaseSwipeAdapter {
                     final Drawable bitmap = new BitmapDrawable(mContext.getResources(), bmp);
                     images.add(bitmap);
 
-                    imgView.setImageBitmap(bmp);
+                    //imgView.setImageBitmap(bmp);
                 }
             }
         });

@@ -55,6 +55,13 @@
             android:label="@string/title_activity_maps"
             android:windowSoftInputMode="adjustNothing"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <activity
+            android:name="vozie.ridesharing.app.vozieandroid.AboutActivity"
+            android:label="@string/title_activity_maps"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>

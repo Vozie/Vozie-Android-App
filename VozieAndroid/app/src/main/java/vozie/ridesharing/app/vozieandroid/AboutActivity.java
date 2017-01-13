@@ -1,16 +1,35 @@
 package vozie.ridesharing.app.vozieandroid;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.example.shane.vozieandroid.R;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 
 public class AboutActivity extends AppCompatActivity {
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+    private String aboutText;
+    private String aboutText2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("DEBUG About Activity", "Code reached the onCreate method for the AboutActivity.class");
         setTheme(R.style.MyAppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
@@ -19,23 +38,82 @@ public class AboutActivity extends AppCompatActivity {
         MenuBarHandler menuBarHandler = new MenuBarHandler(this);
         menuBarHandler.init();
 
-        String aboutText = "Vozie Inc. is a pre-paid ride sharing service HQd out of " +
-                "San Jose California located in the heart of the Silicon Valley. " +
-                "Vozie began as a garage start up in September of 2015. The idea " +
-                "was brought up due to the high surcharges and price increases when " +
-                "using ride sharing services during high peak hours. The Vozie team has " +
-                "made it our mission to provide an option that will be consistent and not " +
-                "gauge people that depend on ride sharing to get around.";
+        Properties prop = new Properties();
+        InputStream input = null;
 
-        String aboutText2 ="Vozie has grown " +
-                "into a four person team that has worked extensively to provide the best " +
-                "solution in the marketplace. Two members of the team are in charge of " +
-                "developing the product for the android app and will be making the app " +
-                "available for the ios.";
 
+        try {
+
+            String filename = "textResources.properties";
+            input = AboutActivity.class.getClassLoader().getResourceAsStream(filename);
+            if (input == null) {
+                System.out.println("Sorry, unable to find " + filename);
+                return;
+            }
+            prop.load(input);
+            aboutText = prop.getProperty("vozie.about.text");
+            aboutText2 = prop.getProperty("vozie.about.tex2");
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+            if (input != null) {
+
+                try {
+
+                    input.close();
+
+                } catch (IOException e) {
+
+                    e.printStackTrace();
+                }
+            }
+        }
         TextView desText = (TextView) findViewById(R.id.description_text);
         desText.setText(aboutText);
         TextView desText2 = (TextView) findViewById(R.id.description_text2);
         desText2.setText(aboutText2);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("About Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
     }
 }
