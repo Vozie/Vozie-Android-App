@@ -8,36 +8,29 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
-import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -124,6 +117,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         setTheme(R.style.MyAppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
@@ -270,7 +264,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         location.getLongitude()),CAMERA_ZOOM_LEVEL), CAMERA_ZOOM_SPEED, null);
             }
         });
-        
+
         locationTextview.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence charsequence, int i, int j, int k) {
@@ -295,10 +289,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void run() {
                         List<Address> addresses = null;
 
-                        if (providers.isNetworkEnabled())
+
+                        if (providers.isNetworkEnabled()) {
+                            double latitude = userLocation.getLatitude();
                             addresses = MapFunctions.resultListFromUserInput(currentSearchText, userLocation);
+                            System.out.println("");
+                        }
                         else {
                             // Throw Connection Error
+                            System.out.println("This did not connect");
                         }
 
                         String tText = currentSearchText;
@@ -577,6 +576,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mLocationRequest, this);
             } catch (SecurityException e) {
                 // Throw Location Error
+                Log.e("Location Error -- Chris", String.valueOf(e));
             }
     }
 
