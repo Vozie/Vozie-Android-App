@@ -1,5 +1,6 @@
 package vozie.ridesharing.app.vozieandroid;
 
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +13,6 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -41,41 +41,11 @@ public class AboutActivity extends AppCompatActivity {
         Properties prop = new Properties();
         InputStream input = null;
 
-
-        try {
-
-            String filename = "textResources.properties";
-            input = AboutActivity.class.getClassLoader().getResourceAsStream(filename);
-            if (input == null) {
-                System.out.println("Sorry, unable to find " + filename);
-                return;
-            }
-            prop.load(input);
-            aboutText = prop.getProperty("vozie.about.text");
-            aboutText2 = prop.getProperty("vozie.about.tex2");
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
-        } finally {
-
-            if (input != null) {
-
-                try {
-
-                    input.close();
-
-                } catch (IOException e) {
-
-                    e.printStackTrace();
-                }
-            }
-        }
         TextView desText = (TextView) findViewById(R.id.description_text);
-        desText.setText(aboutText);
+        desText.setText(R.string.about_company);
+        desText.setTextColor(Color.WHITE);
         TextView desText2 = (TextView) findViewById(R.id.description_text2);
-        desText2.setText(aboutText2);
+        desText2.setText(R.string.about_company2);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -100,11 +70,11 @@ public class AboutActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+//        client.connect();
+//        AppIndex.AppIndexApi.start(client, getIndexApiAction());
     }
 
     @Override
