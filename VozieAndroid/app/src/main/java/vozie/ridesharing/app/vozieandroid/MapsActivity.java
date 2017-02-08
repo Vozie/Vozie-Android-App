@@ -1,4 +1,5 @@
 package vozie.ridesharing.app.vozieandroid;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
@@ -15,13 +16,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -116,6 +117,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         setTheme(R.style.MyAppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
@@ -287,10 +289,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void run() {
                         List<Address> addresses = null;
 
-                        if (providers.isNetworkEnabled())
+
+                        if (providers.isNetworkEnabled()) {
+                            double latitude = userLocation.getLatitude();
                             addresses = MapFunctions.resultListFromUserInput(currentSearchText, userLocation);
+                            System.out.println("");
+                        }
                         else {
                             // Throw Connection Error
+                            System.out.println("This did not connect");
                         }
 
                         String tText = currentSearchText;
@@ -569,6 +576,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mLocationRequest, this);
             } catch (SecurityException e) {
                 // Throw Location Error
+                Log.e("Location Error -- Chris", String.valueOf(e));
             }
     }
 
@@ -1058,3 +1066,5 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         locationBar.startAnimation(slideOutAnim);
     }
 }
+
+
