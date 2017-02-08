@@ -1,8 +1,10 @@
 package vozie.ridesharing.app.vozieandroid;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -23,6 +25,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class HistoryListViewAdapter extends BaseSwipeAdapter {
     private HistoryActivity mActivity;
@@ -52,24 +55,72 @@ public class HistoryListViewAdapter extends BaseSwipeAdapter {
 
     @Override
     public void fillValues(final int position, View convertView) {
-        String latEiffelTower = "48.858235";
-        String lngEiffelTower = "2.294571";
-        final String url = "http://maps.google.com/maps/api/staticmap?center=" + latEiffelTower + "," + lngEiffelTower + "&zoom=15&size=" + "500" + "x" + "200" + "&sensor=false";
+        String lat = Double.toString(historyItems.get(position).toLocation.getLatitude());
+        String lng = Double.toString(historyItems.get(position).toLocation.getLongitude());
+        final String url = "http://maps.google.com/maps/api/staticmap?center=" + lat + "," + lng + "&zoom=15&size=" + "500" + "x" + "200" + "&sensor=false";
         final ImageView imgView = (ImageView) convertView.findViewById(R.id.item_map);
+
+        TextView itemTitleTextview = (TextView) convertView.findViewById(R.id.item_title_textview);
+        TextView dateTextview = (TextView) convertView.findViewById(R.id.date_textview);
+        TextView distanceTextview = (TextView) convertView.findViewById(R.id.distance_textview);
+        ImageView ratingImageview = (ImageView) convertView.findViewById(R.id.star_image);
+
+        ratingImageview.setImageDrawable(getStarsImage(historyItems.get(position).tripRating));
+
+        AssetManager am = mContext.getAssets();
+        itemTitleTextview.setTypeface(Typeface.createFromAsset(am,
+                String.format(Locale.US, "fonts/%s", "ufonts.com_microsoft-jhenghei.ttf")));
+        dateTextview.setTypeface(Typeface.createFromAsset(am,
+                String.format(Locale.US, "fonts/%s", "ufonts.com_microsoft-jhenghei.ttf")));
+        distanceTextview.setTypeface(Typeface.createFromAsset(am,
+                String.format(Locale.US, "fonts/%s", "ufonts.com_microsoft-jhenghei.ttf")));
+
+
+        String titleText = historyItems.get(position).fromLocation + " to "
+                + historyItems.get(position).toLocationString;
+        itemTitleTextview.setText(titleText);
+        dateTextview.setText(historyItems.get(position).date);
+        distanceTextview.setText(historyItems.get(position).distance);
+
         Thread getMapImagesThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                Bitmap bmp = getBitmapFromUrl(url);
+                final Bitmap bmp = getBitmapFromUrl(url);
                 if (bmp != null) {
                     final Drawable bitmap = new BitmapDrawable(mContext.getResources(), bmp);
                     images.add(bitmap);
 
-                    //imgView.setImageBitmap(bmp);
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run(){
+                            imgView.setImageBitmap(bmp);
+                        }
+                    });
+
                 }
             }
         });
 
         getMapImagesThread.start();
+    }
+
+    // To remove
+    public Drawable getStarsImage(int stars) {
+        switch(stars) {
+            case 1:
+                return mContext.getResources().getDrawable(R.drawable.one_star);
+            case 2:
+                return mContext.getResources().getDrawable(R.drawable.two_star);
+            case 3:
+                return mContext.getResources().getDrawable(R.drawable.three_star);
+            case 4:
+                return mContext.getResources().getDrawable(R.drawable.four_star);
+            case 5:
+                return mContext.getResources().getDrawable(R.drawable.five_star);
+            default:
+                return null;
+
+        }
     }
 
     public Bitmap getBitmapFromUrl(String urlStr) {

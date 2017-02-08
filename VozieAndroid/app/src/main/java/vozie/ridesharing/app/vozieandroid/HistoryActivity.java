@@ -1,5 +1,7 @@
 package vozie.ridesharing.app.vozieandroid;
 
+
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -47,10 +49,17 @@ public class HistoryActivity extends AppCompatActivity {
             }
         });
 
-        addHistoryItem(new HistoryItem());
-        addHistoryItem(new HistoryItem());
-        addHistoryItem(new HistoryItem());
-        addHistoryItem(new HistoryItem());
+
+        /* Test Code
+        Location myLocation = new Location("");
+        myLocation.setLatitude(48.858235);
+        myLocation.setLongitude(2.294571);
+
+        addHistoryItem(new HistoryItem("3002 Ironside Court", "UC San Diego", "400 miles", "$300.00", "10/25/2017", "0000123", myLocation, 4));
+        addHistoryItem(new HistoryItem("3002 Ironside Court", "UC San Diego", "400 miles", "$300.00", "10/25/2017", "0000123", myLocation, 4));
+        addHistoryItem(new HistoryItem("3002 Ironside Court", "UC San Diego", "400 miles", "$300.00", "10/25/2017", "0000123", myLocation, 4));
+        addHistoryItem(new HistoryItem("3002 Ironside Court", "UC San Diego", "400 miles", "$300.00", "10/25/2017", "0000123", myLocation, 4));
+        */
     }
 
     @Override
